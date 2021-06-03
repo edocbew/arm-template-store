@@ -117,7 +117,7 @@
             "name": "[variables('publicIPAddress')]",
             "location": "[parameters('location')]",
             "sku": {
-                "name": "Basic",
+                "name": "Standard",
                 "tier": "Global"
             },
             "properties": {

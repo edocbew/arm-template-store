@@ -36,7 +36,7 @@
         "nicName": "GowinHUB_VM_nic",
         "imagePublisher": "Canonical",
         "imageOffer": "UbuntuServer",
-        "imageSKU": "18.04 LTS",
+        "imageSKU": "18.04-LTS",
         "vMSize": "Standard_DS1_v2",
         "storageAccName": "gowinstoredata",
         "storageAccType": "Standard_LRS"
@@ -56,16 +56,16 @@
                 "hardwareProfile": {
                     "vmSize": "[variables('vMSize')]"
                 },
-                "imageReference": {
-                    "publisher": "[variables('imagePublisher')]",
-                    "offer": "[variables('imageOffer')]",
-                    "sku": "[variables('imageSKU')]",
-                    "version": "latest"
-                },
                 "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('imagePublisher')]",
+                        "offer": "[variables('imageOffer')]",
+                        "sku": "[variables('imageSKU')]",
+                        "version": "latest"
+                    },
                     "osDisk": {
                         "name": "osDisk",
-                        "diskSizeGB": 16,
+                        "diskSizeGB": 30,
                         "createOption": "FromImage",
                         "caching": "ReadWrite",
                         "osType": "Linux",
@@ -85,7 +85,7 @@
                 "osProfile": {
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPassword')]",
-                    "computerName": "[variables('hubName')]"
+                    "computerName": "[replace(variables('hubName'),'_','-')]"
                 }
             }
         },
@@ -117,11 +117,13 @@
             "name": "[variables('publicIPAddress')]",
             "location": "[parameters('location')]",
             "sku": {
-                "name": "Standard",
-                "tier": "Global"
+                "name": "Basic",
+                "tier": "Regional"
             },
             "properties": {
-                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+                "publicIPAddressVersion": "IPv4",
+                "idleTimeoutInMinutes": 4
             }
 
         },

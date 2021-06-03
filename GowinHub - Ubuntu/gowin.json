@@ -2,10 +2,11 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "location": {
-            "type": "string",
+        "adminPassword": {
+            "type": "securestring",
+            "minLength": 8,
             "metadata": {
-                "description": "Location of the resources in Azure ex. - East US, West US, West India, etc"
+                "description": "Admin Password for the HUB VM"
             }
         },
         "adminUsername": {
@@ -14,11 +15,10 @@
                 "description": "Admin Username for the HUB VM"
             }
         },
-        "adminPassword": {
-            "type": "securestring",
-            "minLength": 8,
+        "location": {
+            "type": "string",
             "metadata": {
-                "description": "Admin Password for the HUB VM"
+                "description": "Location of the resources in Azure ex. - East US, West US, West India, etc"
             }
         }
     },

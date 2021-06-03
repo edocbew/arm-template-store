@@ -1,7 +1,7 @@
 {
-	"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-	"contentVersion": "1.0.0.0",
-	"parameters": {   
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
         "location": {
             "type": "string",
             "metadata": {
@@ -22,26 +22,26 @@
             }
         }
     },
-	"functions": [],
-	"variables": {
-		"hubName": "GowinHUB_VM",
-		"vnetName": "GowinVnet",
-		"publicIPAddress": "GowinPublicIP",
-		"publicIPAddressType": "Dynamic",
-		"vMSubnetName": "GowinVnet_SubVM",
-		"dBSubnetName": "GowinVnet_SubDB",
-		"vnetAddressPrefix": "10.3.0.0/16",
-		"vMSubnetPrefix": "10.3.1.0/24",
-		"dBsubnetPrefix": "10.3.2.0/24",
-		"nicName": "GowinHUB_VM_nic",
+    "functions": [],
+    "variables": {
+        "hubName": "GowinHUB_VM",
+        "vnetName": "GowinVnet",
+        "publicIPAddress": "GowinPublicIP",
+        "publicIPAddressType": "Dynamic",
+        "vMSubnetName": "GowinVnet_SubVM",
+        "dBSubnetName": "GowinVnet_SubDB",
+        "vnetAddressPrefix": "10.3.0.0/16",
+        "vMSubnetPrefix": "10.3.1.0/24",
+        "dBsubnetPrefix": "10.3.2.0/24",
+        "nicName": "GowinHUB_VM_nic",
         "imagePublisher": "Canonical",
-		"imageOffer": "UbuntuServer",
-		"imageSKU": "18.04 LTS",
-		"vMSize": "Standard_DS1_v2",
-        "storageAccName":"GowinStore_Data",
-		"storageAccType": "Standard_LRS"
-	},
-	"resources": [
+        "imageOffer": "UbuntuServer",
+        "imageSKU": "18.04 LTS",
+        "vMSize": "Standard_DS1_v2",
+        "storageAccName": "GowinStore_Data",
+        "storageAccType": "Standard_LRS"
+    },
+    "resources": [
         {
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2020-12-01",
@@ -54,7 +54,7 @@
             ],
             "properties": {
                 "hardwareProfile": {
-                    "vmSize":"[variables('vMSize')]",
+                    "vmSize": "[variables('vMSize')]"
                 },
                 "imageReference": {
                     "publisher": "[variables('imagePublisher')]",
@@ -62,74 +62,78 @@
                     "sku": "[variables('imageSKU')]",
                     "version": "latest"
                 },
-                "storageProfile":{
+                "storageProfile": {
                     "osDisk": {
                         "name": "osDisk",
                         "diskSizeGB": 16,
                         "createOption": "FromImage",
                         "caching": "ReadWrite",
                         "osType": "Linux",
-                        "writeAcceleratorEnabled": false,
+                        "writeAcceleratorEnabled": false
                     }
                 },
-                "networkProfile":{
-                    "networkInterfaces": [{
-                        "properties":{
-                            "primary": true
-                        },
-                        "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
-                    }]
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "properties": {
+                                "primary": true
+                            },
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+                        }
+                    ]
                 },
-                "osProfile":{
-                    "adminUsername":"[parameters('adminUsername')]",
-                    "adminPassword":"[parameters('adminPassword')]",
-                    "computerName":"[variables('hubName')]"
+                "osProfile": {
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "computerName": "[variables('hubName')]"
                 }
             }
         },
         {
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2020-11-01",
-            "name":"[variables('nicName')]",
+            "name": "[variables('nicName')]",
             "location": "[parameters('location')]",
-            "dependsOn": ["[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"],
+            "dependsOn": [ "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]" ],
             "properties": {
-                "ipConfigurations": [{
-                    "name":"ipconfig_01",
-                    "properties": {
-                        "subnet": {
-                            "id": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vMSubnetName'))]"
-                        },
-                        "privateIPAllocationMethod": "Dynamic",
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig_01",
+                        "properties": {
+                            "subnet": {
+                                "id": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vMSubnetName'))]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic"
+                        }
                     }
-                }],
+                ],
                 "enableIPForwarding": false,
-                "enableAcceleratedNetworking": false,
+                "enableAcceleratedNetworking": false
             }
         },
         {
             "type": "Microsoft.Network/publicIPAddresses",
             "apiVersion": "2020-11-01",
-            "name":"[variables('publicIPAddress')]",
-            "location":"[parameters('location')]",
+            "name": "[variables('publicIPAddress')]",
+            "location": "[parameters('location')]",
             "sku": {
                 "name": "Basic",
                 "tier": "Global"
             },
             "properties": {
-                "publicIPAllocationMethod":"[variables('publicIPAddressType')]",
-                "idleTimeoutInMinutes":60
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+                "idleTimeoutInMinutes": 60
             }
 
         },
         {
             "type": "Microsoft.Storage/storageAccounts",
             "apiVersion": "2021-01-01",
-            "name":"[variables('storageAccName')]",
-            "location":"[parameters('location')]",
+            "name": "[variables('storageAccName')]",
+            "location": "[parameters('location')]",
             "kind": "Storage",
             "sku": {
-                "name":"[variables('storageAccType')]",
+                "name": "[variables('storageAccType')]",
                 "tier": "Standard"
             }
         },
@@ -140,22 +144,25 @@
             "location": "[parameters('location')]",
             "properties": {
                 "addressSpace": {
-                    "addressPrefixes": "[variables('vnetAddressPrefix')]",
+                    "addressPrefixes": "[variables('vnetAddressPrefix')]"
                 },
-                "subnets": [{
-                    "name": "[variables('dBSubnetName')]",
-                    "properties": {
-                        "addressPrefix": "[variables('dBSubnetPrefix')]"
+                "subnets": [
+                    {
+                        "name": "[variables('dBSubnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('dBSubnetPrefix')]"
+                        }
+                    },
+                    {
+                        "name": "[variables('vMSubnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('vMSubnetPrefix')]"
+                        }
                     }
-                }, {
-                    "name": "[variables('vMSubnetName')]",
-                    "properties": {
-                        "addressPrefix": "[variables('vMSubnetPrefix')]"
-                    }
-                }]
+                ]
             }
 
         }
     ],
-	"outputs": {}
+    "outputs": {}
 }

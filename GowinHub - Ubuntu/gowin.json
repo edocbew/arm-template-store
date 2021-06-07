@@ -176,10 +176,16 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                     "fileUris": [
-                        ""
+                        "https://github.com/edocbew/arm-template-store/blob/d643b7b24c66ea54d505ae2b1cb2ed8a19cf8177/GowinHub%20-%20Ubuntu/gowin-setup.sh"
                     ]
+                },
+                "protectedSettings": {
+                    "commandToExecute" : "./gowin-setup.sh"
                 }
-            }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', variables('hubName'))]"
+            ]
 
         }
     ],

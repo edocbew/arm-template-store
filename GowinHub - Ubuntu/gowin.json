@@ -163,6 +163,24 @@
                 ]
             }
 
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2020-12-01",
+            "name":  "[concat(variables('hubName'),'/','GolangSetup')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "1.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        ""
+                    ]
+                }
+            }
+
         }
     ],
     "outputs": {}

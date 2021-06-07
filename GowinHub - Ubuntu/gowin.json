@@ -1,0 +1,187 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminPassword": {
+            "type": "securestring",
+            "minLength": 8,
+            "metadata": {
+                "description": "Admin Password for the HUB VM"
+            }
+        },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Admin Username for the HUB VM"
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location of the resources in Azure ex. - East US, West US, West India, etc"
+            }
+        }
+    },
+    "functions": [],
+    "variables": {
+        "hubName": "GowinHUB_VM",
+        "vnetName": "GowinVnet",
+        "publicIPAddress": "GowinPublicIP",
+        "publicIPAddressType": "Dynamic",
+        "vMSubnetName": "GowinVnet_SubVM",
+        "dBSubnetName": "GowinVnet_SubDB",
+        "vnetAddressPrefix": "10.3.0.0/16",
+        "vMSubnetPrefix": "10.3.1.0/24",
+        "dBsubnetPrefix": "10.3.2.0/24",
+        "nicName": "GowinHUB_VM_nic",
+        "imagePublisher": "Canonical",
+        "imageOffer": "UbuntuServer",
+        "imageSKU": "18.04-LTS",
+        "vMSize": "Standard_DS1_v2",
+        "storageAccName": "gowinstoredata",
+        "storageAccType": "Standard_LRS"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2020-12-01",
+            "name": "[variables('hubName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddress'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccName'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('vMSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('imagePublisher')]",
+                        "offer": "[variables('imageOffer')]",
+                        "sku": "[variables('imageSKU')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "osDisk",
+                        "diskSizeGB": 30,
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "osType": "Linux",
+                        "writeAcceleratorEnabled": false
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "properties": {
+                                "primary": true
+                            },
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "computerName": "[replace(variables('hubName'),'_','-')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('nicName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [ "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]" ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig_01",
+                        "properties": {
+                            "subnet": {
+                                "id": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vMSubnetName'))]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic"
+                        }
+                    }
+                ],
+                "enableIPForwarding": false,
+                "enableAcceleratedNetworking": false
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('publicIPAddress')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Basic",
+                "tier": "Regional"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+                "publicIPAddressVersion": "IPv4",
+                "idleTimeoutInMinutes": 4
+            }
+
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2021-01-01",
+            "name": "[variables('storageAccName')]",
+            "location": "[parameters('location')]",
+            "kind": "Storage",
+            "sku": {
+                "name": "[variables('storageAccType')]",
+                "tier": "Standard"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vnetName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [ "[variables('vnetAddressPrefix')]" ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('dBSubnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('dBSubnetPrefix')]"
+                        }
+                    },
+                    {
+                        "name": "[variables('vMSubnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('vMSubnetPrefix')]"
+                        }
+                    }
+                ]
+            }
+
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2020-12-01",
+            "name":  "[concat(variables('hubName'),'/','GolangSetup')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "1.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        ""
+                    ]
+                }
+            }
+
+        }
+    ],
+    "outputs": {}
+}
